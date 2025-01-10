@@ -69,95 +69,6 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-教程" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2025/01/09/%E6%95%99%E7%A8%8B/" class="article-date">
-  <time class="dt-published" datetime="2025-01-09T13:51:04.000Z" itemprop="datePublished">2025-01-09</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2025/01/09/%E6%95%99%E7%A8%8B/">Hexo+Github搭建免费博客（全网最细）</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <p>[TOC]</p>
-<h1 id="简介测试"><a href="#简介测试" class="headerlink" title="简介测试"></a><a href="#%E7%AE%80%E4%BB%8B" title="简介"></a>简介测试</h1><h2 id="GitHub-Pages与Hexo"><a href="#GitHub-Pages与Hexo" class="headerlink" title="GitHub Pages与Hexo"></a><a href="#GitHub-Pages%E4%B8%8EHexo" title="GitHub Pages与Hexo"></a>GitHub Pages与Hexo</h2><ul>
-<li><p>GitHub Pages 是由 GitHub 官方提供的一种免费的静态站点托管服务，让我们可以在 GitHub 仓库里托管和发布自己的静态网站页面。</p>
-</li>
-<li><p>Hexo 是一个快速、简洁且高效的静态博客框架，它基于 Node.js 运行，可以将我们撰写的 Markdown 文档解析渲染成静态的 HTML 网页。</p>
-</li>
-<li><p>在本地撰写 Markdown 格式文章后，通过 Hexo 解析文档，渲染生成具有主题样式的 HTML 静态网页，再推送到 GitHub 上完成博文的发布。（注意，在GitHub上没有存储你的md文件）</p>
-</li>
-</ul>
-<h2 id="准备"><a href="#准备" class="headerlink" title="准备"></a><a href="#%E5%87%86%E5%A4%87" title="准备"></a>准备</h2><h2 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a><a href="#%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9" title="注意事项"></a>注意事项</h2><ul>
-<li>输入代码时，核对准确，最好切换成英文输入法；</li>
-<li>将文中的 “用户名” 和 “邮箱” 替换为自己的 GitHub 账户名和绑定的邮箱；</li>
-<li>统一使用 Git Bash 进行操作（其实vscode控制台也可以，但是这样子真的好方便，以后就用typora写完直接hexo clean和hexo d就可以了）；</li>
-<li>hhh小白请严格按步骤进行，不要跳！</li>
-</ul>
-<h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a><a href="#%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA" title="环境搭建"></a>环境搭建</h2><p>Hexo 基于 Node.js，搭建过程中还需要使用 npm（Node.js 已带） 和 git，因此先搭建本地操作环境，安装 Node.js 和 Git</p>
-<ul>
-<li><a target="_blank" rel="noopener" href="https://nodejs.org/zh-cn">Node.js</a></li>
-<li><a target="_blank" rel="noopener" href="https://git-scm.com/downloads">Git</a></li>
-</ul>
-<p>下载 Node.js 和 Git 程序并安装，一路点 “下一步” 按默认配置完成安装。</p>
-<p>安装完成后，Win+R 输入 cmd 并打开，依次输入 node -v、npm -v 和 git —version 并回车，如下图出现程序版本号即可。</p>
-<h1 id="连接GitHub"><a href="#连接GitHub" class="headerlink" title="连接GitHub"></a><a href="#%E8%BF%9E%E6%8E%A5GitHub" title="连接GitHub"></a>连接GitHub</h1><ol>
-<li><p>使用邮箱注册<a target="_blank" rel="noopener" href="https://github.com/">GitHub</a>账户(在github官网)</p>
-</li>
-<li><p>右键 -&gt; Git Bash Here , 设置_用户名和邮箱_（在自己电脑，随便找个地方，因为是全局的）</p>
-<table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs stylus">git config <span class="hljs-attr">--global</span> user<span class="hljs-selector-class">.name</span> <span class="hljs-string">"GitHub 用户名"</span><br>git config <span class="hljs-attr">--global</span> user<span class="hljs-selector-class">.email</span> <span class="hljs-string">"GitHub 邮箱"</span><br></code></pre></td></tr></tbody></table>
-</li>
-<li><p><strong>创建 SSH 密匙</strong>：输入 <code>ssh-keygen -t rsa -C &quot;GitHub 邮箱&quot;</code>，然后一路回车。获取生成了密钥。</p>
-<p>（注意，如果不一直回车，自定义名称，则后面需要在。ssh后添加一个config文件，且内容为</p>
-<table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs awk"><span class="hljs-comment"># github</span><br>Host github.com<br>HostName github.com<br>PreferredAuthentications publickey<br>IdentityFile ~<span class="hljs-regexp">/.ssh/</span>你的自定义名称<br></code></pre></td></tr></tbody></table>
-
-<p>）</p>
-</li>
-<li><p><strong>添加密匙：</strong></p>
-<p>进入 [C:\Users\用户名.ssh] 目录（要勾选显示“隐藏的项目”），用记事本打开公钥 id_rsa.pub 文件并复制里面的内容。</p>
-<p>登陆 GitHub ，进入 Settings 页面，选择左边栏的 SSH and GPG keys，点击 New SSH key。</p>
-<p>Title 随便取个名字，粘贴复制的 id_rsa.pub 内容到 Key 中，点击 Add SSH key 完成添加。</p>
-</li>
-<li><p><strong>验证连接：</strong></p>
-<p>打开 Git Bash，输入 <code>ssh -T git@github.com</code> 出现 “Are you sure……”，输入 yes 回车确认</p>
-</li>
-</ol>
-<h1 id="创建Github-Pages仓库"><a href="#创建Github-Pages仓库" class="headerlink" title="创建Github Pages仓库"></a><a href="#%E5%88%9B%E5%BB%BAGithub-Pages%E4%BB%93%E5%BA%93" title="创建Github Pages仓库"></a>创建Github Pages仓库</h1><p>创建后默认自动启用 HTTPS，博客地址为：<code>https://用户名.github.io</code></p>
-<h1 id="本地安装-Hexo-博客程序"><a href="#本地安装-Hexo-博客程序" class="headerlink" title="本地安装 Hexo 博客程序"></a><a href="#%E6%9C%AC%E5%9C%B0%E5%AE%89%E8%A3%85-Hexo-%E5%8D%9A%E5%AE%A2%E7%A8%8B%E5%BA%8F" title="本地安装 Hexo 博客程序"></a>本地安装 Hexo 博客程序</h1><p><a target="_blank" rel="noopener" href="https://hexo.io/zh-cn/docs/">Hexo 官方文档</a></p>
-<p><a target="_blank" rel="noopener" href="https://huangzxuan.github.io/2024/04/09/blog01/">如何选主题更换主题呀，例如我的fluid</a></p>
-<h1 id="部署Hexo到GitHub-Pages"><a href="#部署Hexo到GitHub-Pages" class="headerlink" title="部署Hexo到GitHub Pages"></a><a href="#%E9%83%A8%E7%BD%B2Hexo%E5%88%B0GitHub-Pages" title="部署Hexo到GitHub Pages"></a>部署Hexo到GitHub Pages</h1><p>本地博客测试成功后，就是上传到 GitHub 进行部署，使其能够在网络上访问。</p>
-<p>首先<strong>安装 hexo-deployer-git</strong>：</p>
-<p>然后<strong>修改 _config.yml</strong> 文件末尾的 Deployment 部分，修改成如下：</p>
-<p>完成后运行 <code>hexo d</code> 将网站上传部署到 GitHub Pages。</p>
-<p>完成！这时访问我们的 GitHub 域名 <code>https://用户名.github.io</code> 就可以看到 Hexo 网站了。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2025/01/09/%E6%95%99%E7%A8%8B/" data-id="cm5pzqswk0001cg018we15afz" data-title="Hexo+Github搭建免费博客（全网最细）" class="article-share-link"><span class="fa fa-share">分享</span></a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
     <article id="post-hello-world" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2025/01/07/hello-world/" class="article-date">
@@ -197,7 +108,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2025/01/07/hello-world/" data-id="cm5pzqswg0000cg016os58fxi" data-title="Hello World" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      <a data-url="http://example.com/2025/01/07/hello-world/" data-id="cm5pztvpq0000u001a6sddhj2" data-title="Hello World" class="article-share-link"><span class="fa fa-share">分享</span></a>
       
       
       
@@ -238,10 +149,6 @@
     <h3 class="widget-title">最新文章</h3>
     <div class="widget">
       <ul>
-        
-          <li>
-            <a href="/2025/01/09/%E6%95%99%E7%A8%8B/">Hexo+Github搭建免费博客（全网最细）</a>
-          </li>
         
           <li>
             <a href="/2025/01/07/hello-world/">Hello World</a>
