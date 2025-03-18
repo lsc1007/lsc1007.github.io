@@ -1,0 +1,636 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="林师成">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="简介程序功能把上百份包含图片的PDF翻译成中文文档，并保存为txt文件。 实现步骤 用户导入需翻译的PDF所在文件夹路径 把PDF每一页保存为图片 对每一张图片使用OCR工具提取文字，分别保存为txt 把所有txt汇总 用户输入AI的API密钥、地址和模型名 切割txt，每一份3万字 使用AI翻译每一份txt 汇总txt，保存为新的txt文件  环境搭建 安装库1pip install PyMuP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="批量PDF翻译工具">
+<meta property="og:url" content="http://example.com/2025/03/18/pdf2txt/index.html">
+<meta property="og:site_name" content="林师成的博客">
+<meta property="og:description" content="简介程序功能把上百份包含图片的PDF翻译成中文文档，并保存为txt文件。 实现步骤 用户导入需翻译的PDF所在文件夹路径 把PDF每一页保存为图片 对每一张图片使用OCR工具提取文字，分别保存为txt 把所有txt汇总 用户输入AI的API密钥、地址和模型名 切割txt，每一份3万字 使用AI翻译每一份txt 汇总txt，保存为新的txt文件  环境搭建 安装库1pip install PyMuP">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-03-18T14:27:45.000Z">
+<meta property="article:modified_time" content="2025-03-18T14:54:26.993Z">
+<meta property="article:author" content="林师成">
+<meta property="article:tag" content="python">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>批量PDF翻译工具 - 林师成的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":false,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="批量PDF翻译工具"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-03-18 22:27" pubdate>
+          2025年3月18日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1.3k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          12 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">批量PDF翻译工具</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><h2 id="程序功能"><a href="#程序功能" class="headerlink" title="程序功能"></a>程序功能</h2><p>把上百份包含图片的PDF翻译成中文文档，并保存为txt文件。</p>
+<h2 id="实现步骤"><a href="#实现步骤" class="headerlink" title="实现步骤"></a>实现步骤</h2><ol start="0">
+<li>用户导入需翻译的PDF所在文件夹路径</li>
+<li>把PDF每一页保存为图片</li>
+<li>对每一张图片使用OCR工具提取文字，分别保存为txt</li>
+<li>把所有txt汇总</li>
+<li>用户输入AI的API密钥、地址和模型名</li>
+<li>切割txt，每一份3万字</li>
+<li>使用AI翻译每一份txt</li>
+<li>汇总txt，保存为新的txt文件</li>
+</ol>
+<h1 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h1><ol>
+<li>安装库<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cmake">pip <span class="hljs-keyword">install</span> PyMuPDF pillow pytesseract<br></code></pre></td></tr></table></figure></li>
+<li>安装OCR工具</li>
+</ol>
+<ul>
+<li>Windows：从<a target="_blank" rel="noopener" href="https://github.com/UB-Mannheim/tesseract/wiki">Tesseract官网</a>下载安装</li>
+<li>Mac：<code>brew install tesseract</code></li>
+<li>Linux：<code>sudo apt install tesseract-ocr</code></li>
+<li>下载完自己配置环境变量</li>
+</ul>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> os<br><span class="hljs-keyword">import</span> sys<br><span class="hljs-keyword">import</span> fitz  <span class="hljs-comment"># PyMuPDF</span><br><span class="hljs-keyword">from</span> PIL <span class="hljs-keyword">import</span> Image<br><span class="hljs-keyword">import</span> pytesseract<br><span class="hljs-keyword">import</span> glob<br><br><span class="hljs-comment"># 资源路径处理（用于打包exe）</span><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">resource_path</span>(<span class="hljs-params">relative_path</span>):<br>    <span class="hljs-keyword">try</span>:<br>        base_path = sys._MEIPASS<br>    <span class="hljs-keyword">except</span> Exception:<br>        base_path = os.path.abspath(<span class="hljs-string">&quot;.&quot;</span>)<br>    <span class="hljs-keyword">return</span> os.path.join(base_path, relative_path)<br><br><span class="hljs-comment"># 设置OCR环境路径</span><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">setup_ocr_env</span>():<br>    <span class="hljs-keyword">if</span> <span class="hljs-built_in">getattr</span>(sys, <span class="hljs-string">&#x27;frozen&#x27;</span>, <span class="hljs-literal">False</span>):<br>        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;检测到打包环境，正在设置Tesseract路径...&quot;</span>)<br>        <span class="hljs-comment"># 设置Tesseract路径</span><br>        tess_dir = resource_path(<span class="hljs-string">&#x27;tesseract&#x27;</span>)<br>        os.environ[<span class="hljs-string">&quot;PATH&quot;</span>] += os.pathsep + tess_dir<br>        pytesseract.pytesseract.tesseract_cmd = resource_path(<span class="hljs-string">r&#x27;tesseract\tesseract.exe&#x27;</span>)<br>        <span class="hljs-comment"># 设置语言包路径</span><br>        os.environ[<span class="hljs-string">&#x27;TESSDATA_PREFIX&#x27;</span>] = resource_path(<span class="hljs-string">&#x27;tessdata&#x27;</span>)<br>        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Tesseract路径设置为: <span class="hljs-subst">&#123;pytesseract.pytesseract.tesseract_cmd&#125;</span>&quot;</span>)<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">process_pdfs</span>(<span class="hljs-params">path</span>):<br>    setup_ocr_env()<br>    <br>    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\n正在扫描目录: <span class="hljs-subst">&#123;path&#125;</span>&quot;</span>)<br>    pdf_files = <span class="hljs-built_in">sorted</span>(glob.glob(os.path.join(path, <span class="hljs-string">&#x27;*.pdf&#x27;</span>)))<br>    <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> pdf_files:<br>        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;未找到PDF文件！&quot;</span>)<br>        <span class="hljs-keyword">return</span><br><br>    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;找到 <span class="hljs-subst">&#123;<span class="hljs-built_in">len</span>(pdf_files)&#125;</span> 个PDF文件:&quot;</span>)<br>    [<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;• <span class="hljs-subst">&#123;os.path.basename(f)&#125;</span>&quot;</span>) <span class="hljs-keyword">for</span> f <span class="hljs-keyword">in</span> pdf_files]<br><br>    txt_files = []<br>    <br>    <span class="hljs-keyword">for</span> pdf_file <span class="hljs-keyword">in</span> pdf_files:<br>        <span class="hljs-keyword">try</span>:<br>            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\n正在处理文件: <span class="hljs-subst">&#123;os.path.basename(pdf_file)&#125;</span>&quot;</span>)<br>            doc = fitz.<span class="hljs-built_in">open</span>(pdf_file)<br>            base_name = os.path.splitext(os.path.basename(pdf_file))[<span class="hljs-number">0</span>]<br>            total_pages = <span class="hljs-built_in">len</span>(doc)<br>            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;总页数: <span class="hljs-subst">&#123;total_pages&#125;</span>&quot;</span>)<br><br>            <span class="hljs-keyword">for</span> page_num <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(total_pages):<br>                <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\n处理第 <span class="hljs-subst">&#123;page_num+<span class="hljs-number">1</span>&#125;</span>/<span class="hljs-subst">&#123;total_pages&#125;</span> 页...&quot;</span>)<br>                page = doc.load_page(page_num)<br>                <br>                <span class="hljs-comment"># 生成高清图片</span><br>                <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;正在转换PDF为PNG...&quot;</span>)<br>                mat = fitz.Matrix(<span class="hljs-number">300</span>/<span class="hljs-number">72</span>, <span class="hljs-number">300</span>/<span class="hljs-number">72</span>)  <span class="hljs-comment"># 300dpi</span><br>                pix = page.get_pixmap(matrix=mat)<br>                img_path = os.path.join(path, <span class="hljs-string">f&quot;<span class="hljs-subst">&#123;base_name&#125;</span>_<span class="hljs-subst">&#123;page_num+<span class="hljs-number">1</span>&#125;</span>.png&quot;</span>)<br>                pix.save(img_path)<br>                <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;临时图片已保存: <span class="hljs-subst">&#123;img_path&#125;</span>&quot;</span>)<br><br>                <span class="hljs-comment"># OCR识别</span><br>                <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;正在进行OCR识别...&quot;</span>)<br>                <span class="hljs-keyword">try</span>:<br>                    text = pytesseract.image_to_string(<br>                        Image.<span class="hljs-built_in">open</span>(img_path),<br>                        lang=<span class="hljs-string">&#x27;chi_sim+eng&#x27;</span>  <span class="hljs-comment"># 中英文识别</span><br>                    )<br>                <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:<br>                    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;OCR识别失败: <span class="hljs-subst">&#123;<span class="hljs-built_in">str</span>(e)&#125;</span>&quot;</span>)<br>                    text = <span class="hljs-string">&quot;&quot;</span><br>                <br>                <span class="hljs-comment"># 保存文本</span><br>                txt_path = os.path.join(path, <span class="hljs-string">f&quot;<span class="hljs-subst">&#123;base_name&#125;</span>_<span class="hljs-subst">&#123;page_num+<span class="hljs-number">1</span>&#125;</span>.txt&quot;</span>)<br>                <span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(txt_path, <span class="hljs-string">&quot;w&quot;</span>, encoding=<span class="hljs-string">&quot;utf-8&quot;</span>) <span class="hljs-keyword">as</span> f:<br>                    f.write(text)<br>                <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;文本已保存: <span class="hljs-subst">&#123;txt_path&#125;</span>&quot;</span>)<br>                txt_files.append(txt_path)<br><br>                <span class="hljs-comment"># 清理临时图片</span><br>                os.remove(img_path)<br>                <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;临时图片已删除&quot;</span>)<br><br>            doc.close()<br>            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;文件处理完成: <span class="hljs-subst">&#123;os.path.basename(pdf_file)&#125;</span>&quot;</span>)<br><br>        <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:<br>            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;处理文件时发生错误: <span class="hljs-subst">&#123;<span class="hljs-built_in">str</span>(e)&#125;</span>&quot;</span>)<br>            <span class="hljs-keyword">continue</span><br><br>    <span class="hljs-comment"># 合并文本文件</span><br>    <span class="hljs-keyword">if</span> txt_files:<br>        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\n开始合并文本文件...&quot;</span>)<br>        summary_path = os.path.join(path, <span class="hljs-string">&quot;文字提取汇总.txt&quot;</span>)<br>        <span class="hljs-keyword">try</span>:<br>            <span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(summary_path, <span class="hljs-string">&quot;w&quot;</span>, encoding=<span class="hljs-string">&quot;utf-8&quot;</span>) <span class="hljs-keyword">as</span> outfile:<br>                total = <span class="hljs-built_in">len</span>(txt_files)<br>                <span class="hljs-keyword">for</span> i, txt_file <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(txt_files):<br>                    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;合并进度: <span class="hljs-subst">&#123;i+<span class="hljs-number">1</span>&#125;</span>/<span class="hljs-subst">&#123;total&#125;</span> - <span class="hljs-subst">&#123;os.path.basename(txt_file)&#125;</span>&quot;</span>)<br>                    <span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(txt_file, <span class="hljs-string">&quot;r&quot;</span>, encoding=<span class="hljs-string">&quot;utf-8&quot;</span>) <span class="hljs-keyword">as</span> infile:<br>                        outfile.write(<span class="hljs-string">f&quot;=== <span class="hljs-subst">&#123;os.path.basename(txt_file)&#125;</span> ===\n&quot;</span>)<br>                        outfile.write(infile.read())<br>                        outfile.write(<span class="hljs-string">&quot;\n\n&quot;</span>)<br>            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;合并完成！汇总文件: <span class="hljs-subst">&#123;summary_path&#125;</span>&quot;</span>)<br>        <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:<br>            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;合并文件时出错: <span class="hljs-subst">&#123;<span class="hljs-built_in">str</span>(e)&#125;</span>&quot;</span>)<br>    <span class="hljs-keyword">else</span>:<br>        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;没有可合并的文本文件&quot;</span>)<br><br><span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:<br>    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;=== PDF文字提取工具 ===&quot;</span>)<br>    <span class="hljs-keyword">while</span> <span class="hljs-literal">True</span>:<br>        path = <span class="hljs-built_in">input</span>(<span class="hljs-string">&quot;\n请输入文件目录路径: &quot;</span>).strip()<br>        <span class="hljs-keyword">if</span> os.path.isdir(path):<br>            <span class="hljs-keyword">break</span><br>        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;错误：目录不存在，请重新输入！&quot;</span>)<br>    <br>    process_pdfs(path)<br>    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\n所有处理已完成！按回车键退出...&quot;</span>)<br>    <span class="hljs-built_in">input</span>()<br><br></code></pre></td></tr></table></figure>
+<h1 id="打包为pdf转文字-exe"><a href="#打包为pdf转文字-exe" class="headerlink" title="打包为pdf转文字.exe"></a>打包为pdf转文字.exe</h1><ol>
+<li>安装打包工具<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cmake">pip <span class="hljs-keyword">install</span> pyinstaller<br></code></pre></td></tr></table></figure></li>
+<li>创建打包批处理文件<figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs jboss-cli">@<span class="hljs-keyword">echo</span> off<br>pyinstaller <span class="hljs-params">--onefile</span> ^<br> <span class="hljs-params">--add-data</span> <span class="hljs-string">&quot;tesseract;tesseract&quot;</span> ^<br> <span class="hljs-params">--add-data</span> <span class="hljs-string">&quot;tessdata;tessdata&quot;</span> ^<br> <span class="hljs-params">--hidden-import</span> PIL._tkinter_finder ^<br> <span class="hljs-params">--runtime-tmpdir</span> <span class="hljs-string">&quot;.&quot;</span> ^<br> <span class="hljs-params">--name</span> <span class="hljs-string">&quot;PDF_OCR_Tool&quot;</span> ^<br> pdf2txt.py<br><br><span class="hljs-keyword">echo</span> 打包完成！按任意键退出<span class="hljs-string">...</span><br>pause<br></code></pre></td></tr></table></figure></li>
+<li>目录结构准备<figure class="highlight nix"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs nix">your_project<span class="hljs-symbol">/</span><br>├── tesseract<span class="hljs-symbol">/</span>          <span class="hljs-comment"># 从Tesseract安装目录复制</span><br>│   ├── tesseract.exe<br>│   ├── <span class="hljs-operator">*</span>.dll<br>├── tessdata<span class="hljs-symbol">/</span>           <span class="hljs-comment"># 语言包目录</span><br>│   ├── chi_sim.traineddata  <span class="hljs-comment"># 中文包</span><br>│   └── eng.traineddata      <span class="hljs-comment"># 英文包</span><br>└── pdf_ocr_tool.py<br></code></pre></td></tr></table></figure></li>
+<li>运行bat文件，生成exe</li>
+</ol>
+<h1 id="切割并使用AI翻译"><a href="#切割并使用AI翻译" class="headerlink" title="切割并使用AI翻译"></a>切割并使用AI翻译</h1><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> os<br><span class="hljs-keyword">import</span> requests<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">translate_chunk</span>(<span class="hljs-params">text, api_key, api_base, model_name</span>):<br>	headers = &#123;<br>		<span class="hljs-string">&quot;Authorization&quot;</span>: <span class="hljs-string">f&quot;Bearer <span class="hljs-subst">&#123;api_key&#125;</span>&quot;</span>,<br>		<span class="hljs-string">&quot;Content-Type&quot;</span>: <span class="hljs-string">&quot;application/json&quot;</span><br>	&#125;<br>	<br>	payload = &#123;<br>		<span class="hljs-string">&quot;model&quot;</span>: model_name,<br>		<span class="hljs-string">&quot;messages&quot;</span>: [&#123;<br>			<span class="hljs-string">&quot;role&quot;</span>: <span class="hljs-string">&quot;user&quot;</span>,<br>			<span class="hljs-string">&quot;content&quot;</span>: <span class="hljs-string">f&quot;将以下内容准确翻译成中文，保持原有格式不变：\n<span class="hljs-subst">&#123;text&#125;</span>&quot;</span><br>		&#125;],<br>		<span class="hljs-string">&quot;temperature&quot;</span>: <span class="hljs-number">0.1</span><br>	&#125;<br><br>	<span class="hljs-keyword">try</span>:<br>		response = requests.post(api_base, headers=headers, json=payload)<br>		response.raise_for_status()<br>		<span class="hljs-keyword">return</span> response.json()[<span class="hljs-string">&#x27;choices&#x27;</span>][<span class="hljs-number">0</span>][<span class="hljs-string">&#x27;message&#x27;</span>][<span class="hljs-string">&#x27;content&#x27;</span>]<br>	<span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:<br>		<span class="hljs-keyword">raise</span> Exception(<span class="hljs-string">f&quot;API调用失败: <span class="hljs-subst">&#123;<span class="hljs-built_in">str</span>(e)&#125;</span>&quot;</span>)<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">split_text</span>(<span class="hljs-params">text, max_length=<span class="hljs-number">30000</span></span>):<br>	<span class="hljs-keyword">return</span> [text[i:i+max_length] <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">0</span>, <span class="hljs-built_in">len</span>(text), max_length)]<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">main</span>():<br>	<span class="hljs-comment"># 获取用户输入（带默认值）</span><br>	api_key = <span class="hljs-built_in">input</span>(<span class="hljs-string">f&quot;请输入API密钥（默认：api123123）: &quot;</span>) <span class="hljs-keyword">or</span> <span class="hljs-string">&quot;api123123&quot;</span><br>	api_base = <span class="hljs-built_in">input</span>(<span class="hljs-string">f&quot;请输入API地址（默认：1.1.1.1）: &quot;</span>) <span class="hljs-keyword">or</span> <span class="hljs-string">&quot;1.1.1.1&quot;</span><br>	model_name = <span class="hljs-built_in">input</span>(<span class="hljs-string">f&quot;请输入模型名称（默认：deepseek32b）: &quot;</span>) <span class="hljs-keyword">or</span> <span class="hljs-string">&quot;deepseek32b&quot;</span><br>	file_path = <span class="hljs-built_in">input</span>(<span class="hljs-string">&quot;请输入要翻译的文件路径: &quot;</span>)<br><br>	<span class="hljs-comment"># 读取源文件</span><br>	<span class="hljs-keyword">try</span>:<br>		<span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(file_path, <span class="hljs-string">&#x27;r&#x27;</span>, encoding=<span class="hljs-string">&#x27;utf-8&#x27;</span>) <span class="hljs-keyword">as</span> f:<br>			content = f.read()<br>	<span class="hljs-keyword">except</span> FileNotFoundError:<br>		<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;错误：文件 <span class="hljs-subst">&#123;file_path&#125;</span> 不存在&quot;</span>)<br>		<span class="hljs-keyword">return</span><br><br>	<span class="hljs-comment"># 分块处理</span><br>	chunks = split_text(content)<br>	translated = []<br><br>	<span class="hljs-comment"># 逐块翻译</span><br>	<span class="hljs-keyword">for</span> i, chunk <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(chunks, <span class="hljs-number">1</span>):<br>		<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;正在处理第 <span class="hljs-subst">&#123;i&#125;</span>/<span class="hljs-subst">&#123;<span class="hljs-built_in">len</span>(chunks)&#125;</span> 块（约<span class="hljs-subst">&#123;<span class="hljs-built_in">len</span>(chunk)&#125;</span>字）...&quot;</span>)<br>		<span class="hljs-keyword">try</span>:<br>			translated_chunk = translate_chunk(chunk, api_key, api_base, model_name)<br>			translated.append(translated_chunk)<br>		<span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:<br>			<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;处理第 <span class="hljs-subst">&#123;i&#125;</span> 块时出错: <span class="hljs-subst">&#123;<span class="hljs-built_in">str</span>(e)&#125;</span>&quot;</span>)<br>			<span class="hljs-keyword">return</span><br><br>	<span class="hljs-comment"># 保存结果</span><br>	base_name = os.path.basename(file_path)<br>	output_path = os.path.splitext(base_name)[<span class="hljs-number">0</span>] + <span class="hljs-string">&quot;_翻译.txt&quot;</span><br>	<br>	<span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(output_path, <span class="hljs-string">&#x27;w&#x27;</span>, encoding=<span class="hljs-string">&#x27;utf-8&#x27;</span>) <span class="hljs-keyword">as</span> f:<br>		f.write(<span class="hljs-string">&#x27;&#x27;</span>.join(translated))<br>	<br>	<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\n翻译完成！结果已保存至：<span class="hljs-subst">&#123;output_path&#125;</span>&quot;</span>)<br><br><span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:<br>	main()<br></code></pre></td></tr></table></figure>
+<h1 id="再打包成文字翻译-exe"><a href="#再打包成文字翻译-exe" class="headerlink" title="再打包成文字翻译.exe"></a>再打包成文字翻译.exe</h1><figure class="highlight ada"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ada">pyinstaller <span class="hljs-comment">--onefile  xx.py</span><br></code></pre></td></tr></table></figure>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E8%87%AA%E5%8A%A8%E5%8C%96/" class="category-chain-item">自动化</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/python/" class="print-no-link">#python</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>批量PDF翻译工具</div>
+      <div>http://example.com/2025/03/18/pdf2txt/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>林师成</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年3月18日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/03/18/set/" title="久坐提醒工具">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">久坐提醒工具</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/01/23/%E7%94%A8python%E5%AE%9E%E7%8E%B0%E6%AF%8F%E6%97%A5%E6%95%B0%E6%8D%AE%E6%92%AD%E6%8A%A5/" title="用python实现每日数据播报">
+                        <span class="hidden-mobile">用python实现每日数据播报</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
